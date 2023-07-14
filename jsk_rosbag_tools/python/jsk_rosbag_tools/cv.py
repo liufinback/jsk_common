@@ -8,6 +8,17 @@ import sensor_msgs.msg
 
 _bridge = cv_bridge.CvBridge()
 
+def event_to_img(msg):
+    img = np.zeros((msg.height, msg.width, 3), np.uint8)
+    img[:,:,:] = 128
+
+    for event in msg.events:
+        if event.polarity:
+            img[event.y, event.x,:] = 255
+        else:
+            img[event.y, event.x,:] = 0
+
+    return img
 
 def img_to_msg(img, encoding="bgr8",
                compress=True):

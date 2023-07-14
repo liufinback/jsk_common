@@ -4,6 +4,7 @@ import rosbag
 from jsk_rosbag_tools.cv import compressed_format
 from jsk_rosbag_tools.cv import decompresse_imgmsg
 from jsk_rosbag_tools.cv import msg_to_img
+from jsk_rosbag_tools.cv import event_to_img
 from jsk_rosbag_tools.info import get_topic_dict
 
 
@@ -13,7 +14,8 @@ def get_image_topic_names(bag_filepath,
     topic_names = []
     for topic_name, info in topic_dict.items():
         if info['type'] == 'sensor_msgs/Image' or \
-                info['type'] == 'sensor_msgs/CompressedImage':
+                info['type'] == 'sensor_msgs/CompressedImage' or \
+                info['type'] == 'dvs_msgs/EventArray':
             if rgb_only:
                 msg = extract_oneshot_topic(bag_filepath, topic_name)
                 if topic_dict[topic_name]['type'] == 'sensor_msgs/Image':
@@ -59,6 +61,9 @@ def extract_image_topic(bag_filepath, topic_name):
             elif topic_type == 'sensor_msgs/CompressedImage':
                 bgr_img = decompresse_imgmsg(msg)
                 encoding, _ = compressed_format(msg)
+            elif topic_type == 'dvs_msgs/EventArray':
+                bgr_img = event_to_img(msg)
+                encoding = ['bgr8']
             else:
                 raise RuntimeError('Unsupported Image topic {}'.format(
                     topic_type))
